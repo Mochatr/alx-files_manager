@@ -8,18 +8,19 @@ class DBClient {
 
     const uri = `mongodb://${host}:${port}`;
     this.client = new MongoClient(uri, { useUnifiedTopology: true });
+
     this.client.connect()
       .then(() => {
         this.db = this.client.db(database);
-        console.log("Connected successfully to MongoDB");
       })
       .catch((err) => {
-        console.error("Failed to connect to MongoDB", err);
+        console.error('Failed to connect to MongoDB', err);
+        process.exit(1);
       });
   }
 
   isAlive() {
-    return this.client.isConnected();
+    return !!this.db;
   }
 
   async nbUsers() {
