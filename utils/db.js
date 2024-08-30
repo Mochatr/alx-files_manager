@@ -1,42 +1,45 @@
-import { MongoClient } from 'mongodb';
-
-const DB_HOST = process.env.DB_HOST || 'localhost';
-const DB_PORT = process.env.DB_PORT || 27017;
-const DB_DATABASE = process.env.DB_DATABASE || 'files_manager';
-const url = `mongodb://${DB_HOST}:${DB_PORT}`;
+const { MongoClient } = require('mongodb');
 
 class DBClient {
   constructor() {
-    MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
-      if (!err) {;
-        this.db = client.db(DB_DATABASE);
-        this.usersCollection = this.db.collection('users');
-        this.filesCollection = this.db.collection('files');
-      } else {
-        console.log(err.message);
-        this.db = false;
-      }
-    });
-  }
+    const host = process.env.DB_HOST || 'localhost';
+    const port = process.env.DB_PORT || 27017;
+    const database = process.env.DB_DATABASE || 'files_manager';
 
+    const uri = `mongodb://${host}:${port}`;
+    this.client = new MongoClient(uri, { useUnifiedTopology: true });
+    this.client.connect()
+      .then(() => {
+        this.db = this.client.db(database);
+        console.log("Connected successfully to MongoDB");
+      })
+      .catch((err) => {
+        console.error("Failed to connect to MongoDB", err);
+      });
+  }
 
   isAlive() {
-    return Boolean(this.db);
+    return this.client.isConnected();
   }
-
 
   async nbUsers() {
-    const numberOfUsers = this.usersCollection.countDocuments();
-    return numberOfUsers;
+    try {
+      return await this.db.collection('users').countDocuments();
+    } catch (err) {
+      console.error('Error fetching user count:', err);
+      return null;
+    }
   }
 
-
   async nbFiles() {
-    const numberOfFiles = this.filesCollection.countDocuments();
-    return numberOfFiles;
+    try {
+      return await this.db.collection('files').countDocuments();
+    } catch (err) {
+      console.error('Error fetching file count:', err);
+      return null;
+    }
   }
 }
 
 const dbClient = new DBClient();
-
-export default dbClient;
+module.exports = dbClient;
