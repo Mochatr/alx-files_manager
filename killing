@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Find the process ID (PID) using port 5000
+PID=$(lsof -t -i:5000)
+
+# Check if a process was found
+if [ -n "$PID" ]; then
+  echo "Killing process $PID using port 5000..."
+  kill -9 $PID
+  echo "Process $PID has been killed."
+else
+  echo "No process is using port 5000."
+fi
+
