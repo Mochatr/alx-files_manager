@@ -15,4 +15,9 @@ router.get('/users/me', UsersController.getMe);
 router.post('/users', UsersController.postNew);
 router.post('/files', FilesController.postUpload);
 
+const FilesController = require('../controllers/FilesController');
+
+router.get('/files/:id', FilesController.getShow);
+router.get('/files'), FilesController.getIndex);
+
 export default router;
