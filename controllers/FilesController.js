@@ -6,6 +6,8 @@ import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 import fs from 'fs';
 import mime from 'mime-types';
+import Queue from 'bull';
+
 
 class FilesController {
   static async postUpload(req, res) {
@@ -202,6 +204,13 @@ class FilesController {
     res.contentType(mimeType);
     res.sendFile(filePath);
   }
+
+    const fileQueue = new Queue('fileQueue', 'redis://127.0.0.1:6379');
+
+    if (type === 'image') {
+      const jobId = uuidv4();  // Ensure a unique job ID
+      fileQueue.add({ userId, fileId: newFile.id.toString() }, { jobId });
+    }
 }
 
 export default FilesController;
